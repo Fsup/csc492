@@ -1,0 +1,125 @@
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('1', 'Cunningham', '40.902185', '-81.109661');
+	   
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('2', 'McCready', '40.902207', '-81.109951');
+	   
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('3', 'Miller', '40.902844', '-81.110112');
+	   
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('4', 'King', '40.903724', '-81.110015');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('5', 'Bica-Ross', '40.905232', '-81.112569');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('6', 'Shields', '40.905264', '-81.113668');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('7', 'Elliot', '40.905498', '-81.108745');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('8', 'Ketchum', '40.905496', '-81.109335');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('9', 'McMaster', '40.905472', '-81.110091');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('10', 'Old Townhouses', '40.902263', '-81.113574');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('11', 'New Townhouses', '40.907909', '-81.106468');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('12', 'Hoiles-Peterson', '40.903189', '-81.107791');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('13', 'JAE Manor', '40.906751', '-81.104955');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('14', 'Keller Manor', '40.907061', '-81.105293');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('15', 'Clutter Manor', '40.907428', '-81.105127');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('16', 'Sigma Nu', '40.908277', '-81.105186');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('17', 'Alpha Tau Omega', '40.908660', '-81.105165');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('18', 'Delta Sigma Tau', '40.908660', '-81.105165');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('19', 'Sigma Alpha Epsilon', '40.908801', '-81.106765');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('20', 'King Guest House', '40.907876', '-81.105186');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('21', 'Alpha Delta Pi', '40.906125', '-81.107644');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('22', 'Alpha Xi Delta', '40.906137', '-81.107983');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('23', 'Alpha Chi Omega', '40.906137', '-81.107983');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('24', '205 West Simpson Street', '40.906141', '-81.108379');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('25', '254 Vincent Street', '40.906477', '-81.109328');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('26', '335 Simpson Street', '40.906122', '-81.110415');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('27', '431 Simpson Street', '40.906142', '-81.111131');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('28', 'Vincent Boulevard Theme Houses', '40.906156', '-81.112672');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('29', 'Phi Kappa Tau', '40.909177', '-81.106728');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('30', 'Weber House', '40.906524', '-81.111118');	   	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('31', 'EBB', '40.904574', '-81.108728');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('32', 'T and H', '40.904725', '-81.108360');	   
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('33', 'KHIC', '40.904386', '-81.108019');	
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('34', 'Old KHIC', '40.904053', '-81.108477');	
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('35', 'Chapman', '40.903716', '-81.108762');	
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('36', 'Bracy', '40.903983', '-81.106486');	
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('37', 'Gallaher', '40.903511', '-81.106152');	  
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('38', 'Engineering Test Lab', '40.903511', '-81.106152');	  
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('39', 'McPherson Center', '40.902287', '-81.110447');	  
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('40', 'Timken', '40.902142', '-81.110999');	
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('41', 'Eels', '40.906067', '-81.105504');
+
+INSERT INTO CampusBuildings (BuildingID, BuildingName, Latitude, Longitude)
+VALUES			            ('42', 'Cope', '40.906188', '-81.106161');     
