@@ -1,0 +1,569 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author oravecjp
+ */
+import java.util.*;
+import java.awt.FlowLayout;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.ArrayList;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+
+public class TeamBuilder_Applet extends javax.swing.JApplet {
+
+    private final double RADIUS_OF_EARTH = 63781370; // in meters
+    private ArrayList<CampusBuilding> campusBuildingList;
+    private ArrayList<TeamMember> members;
+    private float[][] DistanceArray;
+    private ArrayList<ArrayList<TeamMember>> traversalLists = new ArrayList<ArrayList<TeamMember>>();
+    private static final double d2r = (Math.PI / 180);
+    ArrayList<TeamMember> traversalList = new ArrayList<TeamMember>();
+
+    private Object makeObj(final String item) {
+        return new Object() {
+            public String toString() {
+                return item;
+            }
+        };
+    }
+
+    public float calculateDistances(float lat1, float lat2, float lon1, float lon2) {
+
+// provided by Stack Overflow
+// http://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
+
+        double dlong = (lon2 - lon1) * d2r;
+        double dlat = (lat2 - lat1) * d2r;
+        double a = Math.pow(Math.sin(dlat / 2D), 2D) + Math.cos(lat1 * d2r) * Math.cos(lat2 * d2r)
+                * Math.pow(Math.sin(dlong / 2D), 2D);
+        double c = 2D * Math.atan2(Math.sqrt(a), Math.sqrt(1D - a));
+        double d = RADIUS_OF_EARTH * c;
+
+        return (float) d;
+
+
+    }
+
+    /**
+     * Initializes the applet TeamBuilder_Applet
+     */
+    @Override
+    public void init() {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(TeamBuilder_Applet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(TeamBuilder_Applet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(TeamBuilder_Applet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(TeamBuilder_Applet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+         /* Create and display the applet */
+        try {
+            java.awt.EventQueue.invokeAndWait(new Runnable() {
+                public void run() {
+                    initComponents();
+                }
+            });
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Connection conn = DriverManager.getConnection("jdbc:sqlserver://platinum.mountunion.edu;user=dotDatASCII;password=ak1zn2jo3cp4#;database=dotDatASCII");
+            Statement sta = conn.createStatement();
+            String Sql = "select * from CampusBuildings";
+            ResultSet rs = sta.executeQuery(Sql);
+            campusBuildingList = new ArrayList<CampusBuilding>();
+            members = new ArrayList<TeamMember>();
+
+
+            while (rs.next()) {
+                //int id = rs.getInt(1);
+                String buildingName = rs.getString(2);
+                float latitude = rs.getFloat(3);
+                float longitude = rs.getFloat(4);
+                //System.out.println("ID: " + id + "  " + "Building Name: " + buildingName);
+                campusBuildingList.add(new CampusBuilding(buildingName, latitude, longitude));
+                cmbBuildings.addItem(makeObj(buildingName));
+            }
+            cmbBuildings.setSelectedIndex(-1); // start off blank
+            DistanceArray = new float[campusBuildingList.size()][campusBuildingList.size()];
+
+            for (CampusBuilding b : campusBuildingList) {
+                for (CampusBuilding c : campusBuildingList) {
+                    float temp = calculateDistances(b.getLatitude(), c.getLatitude(), b.getLongitude(), c.getLongitude());
+                    DistanceArray[campusBuildingList.indexOf(b)][campusBuildingList.indexOf(c)] = temp;
+                }
+            }
+
+//            printDistanceArray();
+
+//            for (int i = 0; i < campusBuildingList.size(); i++) {
+//                System.out.println(campusBuildingList.get(i).getName() + " " + campusBuildingList.get(i).getLatitude() + " " + campusBuildingList.get(i).getLongitude());
+//            }
+
+            rs.close();
+            sta.close();
+
+        } catch (Exception e) {
+            System.out.println("something bad");
+        }
+
+    }
+
+    public void storeTeamMember() {
+        String studentName = txtStudentName.getText();
+        float lat = 0;
+        float lon = 0;
+        TeamMember member;
+
+        if (cmbBuildings.getSelectedIndex() != -1 && (txtLocation.getText().equals("") && txtLatitude.getText().equals("") && txtLongitude.getText().equals(""))) {
+            CampusBuilding building = campusBuildingList.get(cmbBuildings.getSelectedIndex());
+            member = new TeamMember(studentName, building);
+            if (!members.isEmpty()) {
+                for (int i = 0; i < members.size(); i++) {
+                    int index1 = campusBuildingList.indexOf(members.get(i).getBuilding());
+                    int index2 = cmbBuildings.getSelectedIndex();
+                    //System.out.println("index 1: "+ index1 + ": \tindex 2: " + index2);
+                    members.get(i).AddMember(member, DistanceArray[index1][index2]);
+                    member.AddMember(members.get(i), DistanceArray[index2][index1]);
+                }
+
+                members.add(member);
+                for (TeamMember m : members) {
+                    m.getOtherMembers();
+                }
+//                
+//                for(int j = 0; j < members.size()-1; j++)
+//                {
+//                    member.AddMember(member, DistanceArray[campusBuildingList.indexOf(j)][campusBuildingList.indexOf(member)]);
+//                }
+
+//                for (TeamMember m : members) {
+//                    m.AddMember(member,DistanceArray[list.indexOf(m)][list.indexOf(member)]);
+//                    member.AddMember(m,DistanceArray[list.indexOf(member)][list.indexOf(m)]);
+//                }
+            } else if (members.isEmpty()) {
+                members.add(member);
+
+            }
+            //System.out.println("member : " + studentName + " : " + building.getName());
+            txtAddedMembers.append("Team Member: " + studentName + "\nBuilding: " + building.getName() + "\n\n");
+        } else if (cmbBuildings.getSelectedIndex() == -1 && !(txtLocation.getText().equals("") && txtLatitude.getText().equals("") && txtLongitude.getText().equals(""))) {
+            try {
+                lat = Float.parseFloat(txtLatitude.getText());
+                lon = Float.parseFloat(txtLongitude.getText());
+                CampusBuilding building = new CampusBuilding(txtLocation.getText(), lat, lon);
+                member = new TeamMember(studentName, building);
+                if (!members.isEmpty()) {
+                    for (TeamMember m : members) {
+                        m.AddMember(member, DistanceArray[campusBuildingList.indexOf(m)][campusBuildingList.indexOf(member)]);
+                        member.AddMember(m, DistanceArray[campusBuildingList.indexOf(member)][campusBuildingList.indexOf(m)]);
+                    }
+                }
+                members.add(member);
+                System.out.println("member : " + studentName + " : " + building.getName());
+                txtAddedMembers.append("Team Member: " + studentName + "\nLocation: " + building.getName() + "\n\n");
+            } catch (Exception e) {
+                System.out.println("latitude and longitude error");
+
+            }
+        } else {
+            System.out.println("Indecisive Team Member Add Method");
+        }
+
+        cmbBuildings.setSelectedIndex(-1);
+//        txtLocation.setText("");
+//        txtLatitude.setText("");
+//        txtLongitude.setText("");
+//        txtStudentName.setText("");
+    }
+
+    /**
+     * This method is called from within the init() method to initialize the
+     * form. WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    private void initComponents() {
+
+        txtLocation = new javax.swing.JTextField();
+        storeBtn = new javax.swing.JButton();
+        generateTeamsBtn = new javax.swing.JButton();
+        findMeetBtn = new javax.swing.JButton();
+        txtStudentName = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        cmbBuildings = new javax.swing.JComboBox();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        txtLongitude = new javax.swing.JTextField();
+        txtLatitude = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtGroupOutput = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtAddedMembers = new javax.swing.JTextArea();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+
+        setMaximumSize(new java.awt.Dimension(1000, 1000));
+        setName("MyJPanel"); // NOI18N
+        setPreferredSize(new java.awt.Dimension(1000, 1000));
+
+        storeBtn.setText("Store Team Member");
+        storeBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                storeBtnActionPerformed(evt);
+            }
+        });
+
+        generateTeamsBtn.setText("Generate Teams");
+        generateTeamsBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                generateTeamsBtnActionPerformed(evt);
+            }
+        });
+
+        findMeetBtn.setText("Find Meeting Place");
+        findMeetBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                findMeetBtnActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Student's Name:");
+
+        jLabel2.setText("Location Name:");
+
+        jLabel3.setText("GPS Coordinates:");
+
+        jLabel4.setText("Choose an on-campus Location");
+
+        cmbBuildings.setMaximumRowCount(500);
+
+        jLabel5.setText("Step 1: Insert Student's Name");
+
+        jLabel6.setText("Latitude");
+
+        jLabel7.setText("Longitude");
+
+        jLabel8.setText("Step 2: Choose Location");
+
+        jLabel9.setText("OR input your location");
+
+        txtGroupOutput.setColumns(20);
+        txtGroupOutput.setRows(5);
+        jScrollPane1.setViewportView(txtGroupOutput);
+
+        txtAddedMembers.setColumns(20);
+        txtAddedMembers.setRows(5);
+        jScrollPane2.setViewportView(txtAddedMembers);
+
+        jLabel10.setText("Current Team Members");
+
+        jLabel11.setText("Final Groups");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(storeBtn)
+                                .addGap(18, 18, 18)
+                                .addComponent(findMeetBtn)
+                                .addGap(18, 18, 18)
+                                .addComponent(generateTeamsBtn))
+                            .addComponent(jLabel8)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel1)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(txtStudentName, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel4)
+                                            .addComponent(cmbBuildings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel3)
+                                            .addComponent(jLabel9)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel2)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(10, 10, 10)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(jLabel6)
+                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                        .addComponent(jLabel7)
+                                                        .addGap(2, 2, 2)))
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(txtLongitude, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(txtLatitude, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel10)
+                                                .addGap(0, 37, Short.MAX_VALUE))
+                                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))))))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11)))
+                    .addComponent(jLabel5))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(34, 34, 34)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(17, 17, 17)
+                        .addComponent(jLabel1))
+                    .addComponent(txtStudentName, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(13, 13, 13)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cmbBuildings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(42, 42, 42)
+                        .addComponent(jLabel9)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(txtLatitude, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(txtLongitude, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 284, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(storeBtn)
+                    .addComponent(findMeetBtn)
+                    .addComponent(generateTeamsBtn))
+                .addContainerGap())
+        );
+    }// </editor-fold>                        
+
+    private void storeBtnActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        storeTeamMember();
+
+    }                                        
+
+    private void generateTeamsBtnActionPerformed(java.awt.event.ActionEvent evt) {                                                 
+        createTeams();
+    }                                                
+
+    private void findMeetBtnActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        // TODO add your handling code here:
+    }                                           
+    // Variables declaration - do not modify                     
+    private javax.swing.JComboBox cmbBuildings;
+    private javax.swing.JButton findMeetBtn;
+    private javax.swing.JButton generateTeamsBtn;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton storeBtn;
+    private javax.swing.JTextArea txtAddedMembers;
+    private javax.swing.JTextArea txtGroupOutput;
+    private javax.swing.JTextField txtLatitude;
+    private javax.swing.JTextField txtLocation;
+    private javax.swing.JTextField txtLongitude;
+    private javax.swing.JTextField txtStudentName;
+    // End of variables declaration                   
+
+    private void printDistanceArray() {
+
+        float temp = 0;
+
+        for (int i = 0; i < DistanceArray.length; i++) {
+            for (int j = 0; j < DistanceArray[i].length; j++) {
+                temp = DistanceArray[i][j];
+                System.out.print("[" + temp + "] ");
+            }
+            System.out.println("");
+        }
+
+    }
+
+    private void createTeams() {
+
+        TeamMember closestNeighbor = new TeamMember();
+        TeamMember memberToTest = new TeamMember();
+        float distanceToTest;
+        ArrayList<Float> computedPaths = new ArrayList<Float>();
+        
+
+
+        for (int i = 0; i < members.size(); i++) {
+            System.out.println("Iteration: " + i);
+            float shortestDistance = (float) RADIUS_OF_EARTH;
+
+            for (TeamMember m : members) {
+                m.setHasBeenVisited(false);
+            }
+            traversalList = new ArrayList<TeamMember>();
+            TeamMember currentMember = members.get(i);
+            currentMember.setHasBeenVisited(true);
+            traversalList.add(currentMember);
+            while (traversalList.size() < members.size()) {
+                for (int j = 0; j < members.size(); j++) {
+                    System.out.println("Iteration j:" + j + " of " + members.size());
+                    memberToTest = members.get(j);
+                    System.out.println("Selecting " + memberToTest.getName() + " to test");
+                    distanceToTest = getDistanceTo(memberToTest.getBuilding(), members.get(j).getBuilding());
+                    //TeamMember closestNeighbor = members.get(i).getMemberFromInnerList(j);
+                   // System.out.println("shortest Distance: " + shortestDistance);
+                    //System.out.println("distance to Test: " + distanceToTest);
+                    System.out.println(memberToTest.getName() + " has been visited?: " + memberToTest.hasBeenVisited()); /////PROBLEM
+                    if (distanceToTest < shortestDistance && !memberToTest.hasBeenVisited()) {
+                        System.out.println("New shortest distance found!");
+                        shortestDistance = distanceToTest;
+                        closestNeighbor = memberToTest;
+                    }
+                    System.out.println("shortest Distance: " + shortestDistance + " to " + closestNeighbor.getName());
+                }
+                System.out.println("Executing move to: " + closestNeighbor.getName());
+                currentMember = closestNeighbor;
+                System.out.println("currentMember: " + currentMember.getName());
+                currentMember.setHasBeenVisited(true);
+                shortestDistance = (float) RADIUS_OF_EARTH;
+                traversalList.add(currentMember);
+
+
+                System.out.println("traversalList: ");
+                for (TeamMember b : traversalList) {
+                    System.out.print(b.getName() + " -> ");
+                }
+                  System.out.println("");
+            }
+            traversalLists.add(traversalList);
+            //traversalList.clear();
+        }
+        
+         System.out.println("List of Traversals: " + traversalLists.size());
+        for (int i = 0; i < traversalLists.size(); i++) {            
+            ArrayList<TeamMember> temp = new ArrayList<TeamMember>();
+            temp = (ArrayList<TeamMember>)traversalLists.get(i);
+            System.out.println("temp size" + temp.size());
+            for (int j = 0; j < temp.size(); j++) {
+                System.out.print(temp.get(j).getName() + " -> ");
+            }
+            System.out.println(" Cumulative Distance: " + getTraversalDistance(traversalLists.get(i)));
+            
+            /*new code*/
+            computedPaths.add(getTraversalDistance(traversalLists.get(i)));
+        }
+        
+        float shortestPath = computedShortestPath(computedPaths);
+        
+        for(int i = 0; i < computedPaths.size(); i++)
+        {
+            if(computedPaths.get(i) == shortestPath)
+            {
+                
+            }
+        }
+
+    }
+
+    public float getTraversalDistance(ArrayList<TeamMember> al){
+        float sum = 0;
+        for(int i=0; i < al.size() ;i++){
+            if(i == al.size() - 1){
+                System.out.println("do nothing");
+            }
+            else{
+                sum += getDistanceTo(al.get(i).getBuilding(),al.get(i + 1).getBuilding());
+            }
+        }
+        return sum;
+    }
+    
+    public float getDistanceTo(CampusBuilding a, CampusBuilding b) {
+        int start = campusBuildingList.indexOf(a);
+        int end = campusBuildingList.indexOf(b);
+        return DistanceArray[start][end];
+    }
+    
+    public float computedShortestPath(ArrayList<Float> list)
+    {
+        float shortestPath = list.get(0);
+        for(int i = 1; i < list.size(); i++)
+        {
+            if(list.get(i) < shortestPath)
+            {
+                shortestPath = list.get(i);
+            }
+        }
+        
+        return shortestPath;
+    }
+}
