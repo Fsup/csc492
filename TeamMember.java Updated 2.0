@@ -1,0 +1,94 @@
+
+import java.util.ArrayList;
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ *
+ * @author oravecjp
+ */
+public class TeamMember {
+    
+    private String name;
+    private CampusBuilding building;
+    private ArrayList<TeamMember> otherMembers = new ArrayList<TeamMember>();
+    private ArrayList<Float> distances = new ArrayList<Float>();
+    
+    private boolean hasBeenVisited = false;
+    
+    public TeamMember(String name, CampusBuilding building)
+    {
+        this.name = name;
+        this.building = building;
+    }
+    
+    public TeamMember()
+    {
+        
+    }
+    
+    public void setName(String n)
+    {
+        name = n;
+    }
+    
+    public void setBuilding(CampusBuilding b)
+    {
+        building = b;
+    }
+    
+    public String getName()
+    {
+        return name;
+    }
+    
+    public CampusBuilding getBuilding()
+    {
+        return building;
+    }
+    
+    public float getDistanceOfAnotherMember(int i) {
+        return distances.get(i);
+    }
+    
+    public TeamMember getMemberFromInnerList(int i)
+    {
+        return otherMembers.get(i);
+    }
+    
+    public void AddMember(TeamMember t, float distanceTo)
+    {
+        this.otherMembers.add(t);
+        addDistance(distanceTo);
+    }
+    
+    public boolean hasBeenVisited()
+    {
+        return hasBeenVisited;
+    }
+    
+    public void setHasBeenVisited(boolean b)
+    {
+        hasBeenVisited = b;
+    }
+    
+    public void getOtherMembers(){
+        
+        System.out.println("Other Members for: " + this.name); 
+        for(TeamMember m: otherMembers){
+        System.out.println("\tName: " + m.name + " Distance: " + distances.get(otherMembers.indexOf(m))); 
+        }
+    }
+    
+    public int otherMembersListSize()
+    {
+        return otherMembers.size();
+    }    
+
+    private void addDistance(float distanceTo) {
+        this.distances.add(distanceTo);
+    }    
+}
